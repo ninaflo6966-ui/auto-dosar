@@ -1,3 +1,5 @@
+import { documentsCatalog } from "./documents.catalog";
+
 export interface RuleResult {
   documents: string[];
   taxes: string[];
@@ -19,47 +21,37 @@ export function buildTranscriereDosar(
   const taxes: string[] = [];
   const forms: string[] = [];
 
-  // PF / PJ
-
   if (data.personType === "pf") {
-    documents.push("Carte identitate proprietar");
+    documents.push(documentsCatalog.ci_pf.name);
   }
 
   if (data.personType === "pj") {
-    documents.push("Certificat înregistrare firmă");
-    documents.push("Certificat constatator ONRC");
-    documents.push("Act identitate reprezentant legal");
+    documents.push(documentsCatalog.cui_pj.name);
+    documents.push(documentsCatalog.certificat_onrc.name);
+    documents.push(documentsCatalog.ci_reprezentant.name);
   }
-
-  // împuternicit
 
   if (data.proxy === "da") {
-    documents.push("Împuternicire");
-    documents.push("Act identitate împuternicit");
+    documents.push(documentsCatalog.imputernicire.name);
+    documents.push(documentsCatalog.ci_imputernicit.name);
   }
 
-  // documente comune
-
-  documents.push("Contract vânzare-cumpărare");
-  documents.push("Carte identitate vehicul");
-  documents.push("Certificat de înmatriculare");
-  documents.push("RCA");
-  documents.push("Certificat fiscal");
-
-  // formulare
+  documents.push(documentsCatalog.contract_vc.name);
+  documents.push(documentsCatalog.civ.name);
+  documents.push(documentsCatalog.talon.name);
+  documents.push(documentsCatalog.rca.name);
+  documents.push(documentsCatalog.certificat_fiscal.name);
 
   forms.push("Cerere transcriere");
 
-  // taxe
-
-  taxes.push("Certificat de înmatriculare");
+  taxes.push("Taxă certificat de înmatriculare");
 
   const needsNewPlates =
     data.sameCounty === "nu" ||
     data.plateStaysOnCar === "nu";
 
   if (needsNewPlates) {
-    taxes.push("Plăcuțe de înmatriculare");
+    taxes.push("Contravaloare plăcuțe de înmatriculare");
 
     if (data.plateType === "preferentiale") {
       taxes.push("Rezervare număr preferențial");

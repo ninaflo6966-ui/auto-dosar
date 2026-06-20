@@ -1,3 +1,5 @@
+import { documentsCatalog } from "./documents.catalog";
+
 export interface RuleResult {
   documents: string[];
   taxes: string[];
@@ -11,40 +13,96 @@ export interface AutorizatieInput {
   temporaryAuthNumber: string;
 }
 
-export function buildAutorizatieDosar(data: AutorizatieInput): RuleResult {
+export function buildAutorizatieDosar(
+  data: AutorizatieInput
+): RuleResult {
   const documents: string[] = [];
   const taxes: string[] = [];
   const forms: string[] = [];
 
+  // PF / PJ
+
   if (data.personType === "pf") {
-    documents.push("Carte identitate solicitant");
+    documents.push(documentsCatalog.ci_pf.name);
   }
 
   if (data.personType === "pj") {
-    documents.push("Certificat înregistrare firmă");
-    documents.push("Act identitate reprezentant legal");
+    documents.push(documentsCatalog.cui_pj.name);
+    documents.push(documentsCatalog.ci_reprezentant.name);
   }
+
+  // Împuternicit
 
   if (data.proxy === "da") {
-    documents.push("Împuternicire");
-    documents.push("Act identitate împuternicit");
+    documents.push(documentsCatalog.imputernicire.name);
+    documents.push(documentsCatalog.ci_imputernicit.name);
   }
 
-  documents.push("Document proprietate");
-  documents.push("RCA provizorie");
+  // Documente de bază
+
+  documents.push(documentsCatalog.rca.name);
+
+  if (data.origin === "romania") {
+    documents.push(
+      documentsCatalog.document_proprietate.name
+    );
+  }
 
   if (data.origin === "ue") {
-    documents.push("Acte străine vehicul");
+    documents.push(
+      documentsCatalog.document_proprietate.name
+    );
+    documents.push(
+      documentsCatalog.acte_straine.name
+    );
   }
 
   if (data.origin === "non-ue") {
-    documents.push("Acte străine vehicul");
-    documents.push("Documente vamale");
+    documents.push(
+      documentsCatalog.document_proprietate.name
+    );
+    documents.push(
+      documentsCatalog.acte_straine.name
+    );
+    documents.push(
+      documentsCatalog.documente_vamale.name
+    );
   }
 
-  forms.push("Cerere autorizare provizorie");
-  taxes.push("Taxă autorizație provizorie");
-  taxes.push("Taxă plăcuțe provizorii");
+  // Formular
 
-  return { documents, taxes, forms };
+  forms.push("Cerere autorizație provizorie");
+
+  // Taxe
+
+  taxes.push("Taxă autorizație provizorie");
+  taxes.push("Contravaloare plăcuțe provizorii");
+
+  // Număr autorizație
+
+  switch (data.temporaryAuthNumber) {
+    case "prima":
+      documents.push(
+        "Declarație pe proprie răspundere - prima autorizație"
+      );
+      break;
+
+    case "a-doua":
+      documents.push(
+        "Declarație pe proprie răspundere - a doua autorizație"
+      );
+      break;
+
+    case "a-treia":
+      documents.push(
+        "Declarație pe proprie răspundere - a treia autorizație"
+      );
+      break;
+  }
+
+  return {
+    documents,
+    taxes,
+    forms,
+  };
 }

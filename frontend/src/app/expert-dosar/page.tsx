@@ -17,6 +17,14 @@ const operationsWithOriginQuestion = [
   "autorizatie-provizorie",
 ];
 
+const counties = [
+  "AB", "AR", "AG", "BC", "BH", "BN", "BT", "BR", "BV", "BZ",
+  "CS", "CL", "CJ", "CT", "CV", "DB", "DJ", "GL", "GR", "GJ",
+  "HR", "HD", "IL", "IS", "IF", "MM", "MH", "MS", "NT", "OT",
+  "PH", "SM", "SJ", "SB", "SV", "TR", "TM", "TL", "VS", "VL",
+  "VN", "B",
+];
+
 export default function ExpertDosarPage() {
   const searchParams = useSearchParams();
   const operationSlug = searchParams.get("operatiune") || "transcriere-auto";
@@ -25,13 +33,19 @@ export default function ExpertDosarPage() {
   const shouldAskOrigin = operationsWithOriginQuestion.includes(operationSlug);
 
   const [personType, setPersonType] = useState<"pf" | "pj" | "">("");
+  const [county, setCounty] = useState("");
   const [proxy, setProxy] = useState<"da" | "nu" | "">("");
   const [origin, setOrigin] = useState<"romania" | "ue" | "non-ue" | "">(
     shouldAskOrigin ? "" : "romania"
   );
 
   const [vehicleCondition, setVehicleCondition] = useState<"nou" | "second-hand" | "">("");
+  const [sellerType, setSellerType] = useState<"pf" | "pj" | "">("");
   const [plateType, setPlateType] = useState<"rand" | "preferentiale" | "">("");
+
+  const [preferredPlate1, setPreferredPlate1] = useState("");
+  const [preferredPlate2, setPreferredPlate2] = useState("");
+  const [preferredPlate3, setPreferredPlate3] = useState("");
 
   const [sameCounty, setSameCounty] = useState<"da" | "nu" | "">("");
   const [plateStaysOnCar, setPlateStaysOnCar] = useState<"da" | "nu" | "">("");
@@ -51,23 +65,44 @@ export default function ExpertDosarPage() {
     "pierdut" | "furat" | "deteriorat" | ""
   >("");
 
-  const isBaseComplete = personType && proxy && (!shouldAskOrigin || origin);
+  const transcriereNeedsNewPlates =
+    operationSlug === "transcriere-auto" &&
+    (sameCounty === "nu" || plateStaysOnCar === "nu");
+
+  const shouldShowPreferredPlates =
+    plateType === "preferentiale" &&
+    (operationSlug === "inmatriculare-definitiva" || transcriereNeedsNewPlates);
+
+  const isBaseComplete = personType && county && proxy && (!shouldAskOrigin || origin);
 
   const isInmatriculareComplete =
     operationSlug !== "inmatriculare-definitiva" ||
-    (vehicleCondition && plateType);
+    (
+      vehicleCondition &&
+      plateType &&
+      (
+        vehicleCondition !== "second-hand" ||
+        sellerType
+      )
+    );
 
   const isTranscriereComplete =
     operationSlug !== "transcriere-auto" ||
-    (sameCounty && (sameCounty === "nu" || plateStaysOnCar));
+    (
+      sameCounty &&
+      (
+        sameCounty === "nu"
+          ? plateType
+          : plateStaysOnCar && (plateStaysOnCar === "da" || plateType)
+      )
+    );
 
   const isAutorizatieComplete =
     operationSlug !== "autorizatie-provizorie" || temporaryAuthNumber;
 
   const isRadiereComplete =
     operationSlug !== "radiere-vehicul" ||
-    (deregistrationReason &&
-      (deregistrationReason !== "export" || ownerKeepsPlateCombination));
+    (deregistrationReason && ownerKeepsPlateCombination);
 
   const isModificareComplete =
     operationSlug !== "modificare-date" || modificationType;
@@ -91,10 +126,15 @@ export default function ExpertDosarPage() {
       operationSlug,
       operationTitle,
       personType,
+      county,
       proxy,
       origin: finalOrigin,
       vehicleCondition,
+      sellerType,
       plateType,
+      preferredPlate1,
+      preferredPlate2,
+      preferredPlate3,
       sameCounty,
       plateStaysOnCar,
       temporaryAuthNumber,
@@ -109,10 +149,15 @@ export default function ExpertDosarPage() {
     const params = new URLSearchParams({
       operatiune: operationSlug,
       tip: personType,
+      judet: county,
       origine: finalOrigin,
       imputernicit: proxy,
       stareVehicul: vehicleCondition,
+      tipVanzator: sellerType,
       tipPlacute: plateType,
+      numarPreferential1: preferredPlate1,
+      numarPreferential2: preferredPlate2,
+      numarPreferential3: preferredPlate3,
       acelasiJudet: sameCounty,
       numarRamanePeMasina: plateStaysOnCar,
       numarAutorizatieProvizorie: temporaryAuthNumber,
@@ -153,7 +198,28 @@ export default function ExpertDosarPage() {
             <Option label="Persoană juridică" active={personType === "pj"} onClick={() => setPersonType("pj")} />
           </Question>
 
-          <Question title="2. Există împuternicit?">
+          <Question title="2. Județ înmatriculare:">
+            <select
+              value={county}
+              onChange={(event) => setCounty(event.target.value)}
+              style={{
+                padding: "12px",
+                borderRadius: "10px",
+                border: "1px solid #d1d5db",
+                minWidth: "220px",
+                fontSize: "16px",
+              }}
+            >
+              <option value="">Selectează județul</option>
+              {counties.map((countyCode) => (
+                <option key={countyCode} value={countyCode}>
+                  {countyCode}
+                </option>
+              ))}
+            </select>
+          </Question>
+
+          <Question title="3. Există împuternicit?">
             <Option label="Da" active={proxy === "da"} onClick={() => setProxy("da")} />
             <Option label="Nu" active={proxy === "nu"} onClick={() => setProxy("nu")} />
           </Question>
@@ -169,7 +235,14 @@ export default function ExpertDosarPage() {
           {operationSlug === "inmatriculare-definitiva" && (
             <>
               <Question title="4. Vehiculul este:">
-                <Option label="Nou" active={vehicleCondition === "nou"} onClick={() => setVehicleCondition("nou")} />
+                <Option
+                  label="Nou"
+                  active={vehicleCondition === "nou"}
+                  onClick={() => {
+                    setVehicleCondition("nou");
+                    setSellerType("");
+                  }}
+                />
                 <Option
                   label="Second-hand"
                   active={vehicleCondition === "second-hand"}
@@ -177,13 +250,24 @@ export default function ExpertDosarPage() {
                 />
               </Question>
 
-              <Question title="5. Tip plăcuțe:">
+              {vehicleCondition === "second-hand" && (
+                <Question title="5. Vânzătorul este:">
+                  <Option
+                    label="Persoană fizică"
+                    active={sellerType === "pf"}
+                    onClick={() => setSellerType("pf")}
+                  />
+                  <Option
+                    label="Persoană juridică"
+                    active={sellerType === "pj"}
+                    onClick={() => setSellerType("pj")}
+                  />
+                </Question>
+              )}
+
+              <Question title={vehicleCondition === "second-hand" ? "6. Tip plăcuțe:" : "5. Tip plăcuțe:"}>
                 <Option label="La rând" active={plateType === "rand"} onClick={() => setPlateType("rand")} />
-                <Option
-                  label="Preferențiale"
-                  active={plateType === "preferentiale"}
-                  onClick={() => setPlateType("preferentiale")}
-                />
+                <Option label="Preferențiale" active={plateType === "preferentiale"} onClick={() => setPlateType("preferentiale")} />
               </Question>
             </>
           )}
@@ -197,6 +281,7 @@ export default function ExpertDosarPage() {
                   onClick={() => {
                     setSameCounty("da");
                     setPlateStaysOnCar("");
+                    setPlateType("");
                   }}
                 />
                 <Option
@@ -205,21 +290,67 @@ export default function ExpertDosarPage() {
                   onClick={() => {
                     setSameCounty("nu");
                     setPlateStaysOnCar("");
+                    setPlateType("");
                   }}
                 />
               </Question>
 
               {sameCounty === "da" && (
                 <Question title="4. Numărul de înmatriculare rămâne pe mașină?">
-                  <Option label="Da" active={plateStaysOnCar === "da"} onClick={() => setPlateStaysOnCar("da")} />
-                  <Option label="Nu" active={plateStaysOnCar === "nu"} onClick={() => setPlateStaysOnCar("nu")} />
+                  <Option
+                    label="Da"
+                    active={plateStaysOnCar === "da"}
+                    onClick={() => {
+                      setPlateStaysOnCar("da");
+                      setPlateType("");
+                    }}
+                  />
+                  <Option
+                    label="Nu"
+                    active={plateStaysOnCar === "nu"}
+                    onClick={() => {
+                      setPlateStaysOnCar("nu");
+                      setPlateType("");
+                    }}
+                  />
                 </Question>
               )}
 
               {sameCounty === "nu" && (
                 <InfoBox text="Județul este diferit, deci va fi necesar un număr nou de înmatriculare." />
               )}
+
+              {transcriereNeedsNewPlates && (
+                <Question title={sameCounty === "nu" ? "4. Tip plăcuțe:" : "5. Tip plăcuțe:"}>
+                  <Option label="La rând" active={plateType === "rand"} onClick={() => setPlateType("rand")} />
+                  <Option label="Preferențiale" active={plateType === "preferentiale"} onClick={() => setPlateType("preferentiale")} />
+                </Question>
+              )}
             </>
+          )}
+
+          {shouldShowPreferredPlates && (
+            <div
+              style={{
+                marginBottom: "28px",
+                padding: "18px",
+                borderRadius: "14px",
+                background: "#f9fafb",
+                border: "1px solid #e5e7eb",
+              }}
+            >
+              <h2 style={{ fontSize: "22px", marginBottom: "10px" }}>
+                Combinații număr preferențial
+              </h2>
+              <p style={{ color: "#6b7280", marginBottom: "14px" }}>
+                Poți introduce maximum 3 combinații de cifre și litere. Județul selectat este {county || "nespecificat"} și se va completa separat în numărul final.
+              </p>
+              <div style={{ display: "grid", gap: "12px" }}>
+                <PreferredPlateInput label="Varianta 1" value={preferredPlate1} onChange={setPreferredPlate1} />
+                <PreferredPlateInput label="Varianta 2" value={preferredPlate2} onChange={setPreferredPlate2} />
+                <PreferredPlateInput label="Varianta 3" value={preferredPlate3} onChange={setPreferredPlate3} />
+              </div>
+            </div>
           )}
 
           {operationSlug === "autorizatie-provizorie" && (
@@ -233,24 +364,44 @@ export default function ExpertDosarPage() {
           {operationSlug === "radiere-vehicul" && (
             <>
               <Question title="3. Motiv radiere:">
-                <Option label="Export" active={deregistrationReason === "export"} onClick={() => setDeregistrationReason("export")} />
-                <Option label="Casare / dezmembrare" active={deregistrationReason === "casare"} onClick={() => setDeregistrationReason("casare")} />
-                <Option label="Furt" active={deregistrationReason === "furt"} onClick={() => setDeregistrationReason("furt")} />
-                <Option label="La cerere" active={deregistrationReason === "la-cerere"} onClick={() => setDeregistrationReason("la-cerere")} />
+                <Option
+                  label="Export"
+                  active={deregistrationReason === "export"}
+                  onClick={() => {
+                    setDeregistrationReason("export");
+                    setOwnerKeepsPlateCombination("");
+                  }}
+                />
+                <Option
+                  label="Casare / dezmembrare"
+                  active={deregistrationReason === "casare"}
+                  onClick={() => {
+                    setDeregistrationReason("casare");
+                    setOwnerKeepsPlateCombination("");
+                  }}
+                />
+                <Option
+                  label="Furt"
+                  active={deregistrationReason === "furt"}
+                  onClick={() => {
+                    setDeregistrationReason("furt");
+                    setOwnerKeepsPlateCombination("");
+                  }}
+                />
+                <Option
+                  label="La cerere"
+                  active={deregistrationReason === "la-cerere"}
+                  onClick={() => {
+                    setDeregistrationReason("la-cerere");
+                    setOwnerKeepsPlateCombination("");
+                  }}
+                />
               </Question>
 
-              {deregistrationReason === "export" && (
+              {deregistrationReason && (
                 <Question title="4. Vechiul proprietar păstrează combinația numărului de înmatriculare?">
-                  <Option
-                    label="Da"
-                    active={ownerKeepsPlateCombination === "da"}
-                    onClick={() => setOwnerKeepsPlateCombination("da")}
-                  />
-                  <Option
-                    label="Nu"
-                    active={ownerKeepsPlateCombination === "nu"}
-                    onClick={() => setOwnerKeepsPlateCombination("nu")}
-                  />
+                  <Option label="Da" active={ownerKeepsPlateCombination === "da"} onClick={() => setOwnerKeepsPlateCombination("da")} />
+                  <Option label="Nu" active={ownerKeepsPlateCombination === "nu"} onClick={() => setOwnerKeepsPlateCombination("nu")} />
                 </Question>
               )}
             </>
@@ -277,10 +428,15 @@ export default function ExpertDosarPage() {
           <SummaryBox
             operationTitle={operationTitle}
             personType={personType}
+            county={county}
             proxy={proxy}
             origin={shouldAskOrigin ? origin : "romania"}
             vehicleCondition={vehicleCondition}
+            sellerType={sellerType}
             plateType={plateType}
+            preferredPlate1={preferredPlate1}
+            preferredPlate2={preferredPlate2}
+            preferredPlate3={preferredPlate3}
             sameCounty={sameCounty}
             plateStaysOnCar={plateStaysOnCar}
             temporaryAuthNumber={temporaryAuthNumber}
@@ -347,6 +503,34 @@ function Option({
   );
 }
 
+function PreferredPlateInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label style={{ display: "grid", gap: "6px", color: "#374151" }}>
+      {label}
+      <input
+        value={value}
+        maxLength={6}
+        placeholder="ex. 99ABC"
+        onChange={(event) => onChange(event.target.value.toUpperCase())}
+        style={{
+          padding: "12px",
+          borderRadius: "10px",
+          border: "1px solid #d1d5db",
+          fontSize: "16px",
+        }}
+      />
+    </label>
+  );
+}
+
 function InfoBox({ text }: { text: string }) {
   return (
     <div
@@ -381,13 +565,19 @@ function SummaryBox(props: Record<string, string>) {
         <br />
         Tip persoană: {props.personType === "pf" ? "Persoană fizică" : props.personType === "pj" ? "Persoană juridică" : "-"}
         <br />
+        Județ înmatriculare: {props.county || "-"}
+        <br />
         Împuternicit: {props.proxy || "-"}
         <br />
         Origine vehicul: {props.origin || "-"}
         <br />
         Stare vehicul: {props.vehicleCondition || "-"}
         <br />
+        Vânzător: {props.sellerType === "pf" ? "Persoană fizică" : props.sellerType === "pj" ? "Persoană juridică" : "-"}
+        <br />
         Tip plăcuțe: {props.plateType || "-"}
+        <br />
+        Combinații preferențiale: {[props.preferredPlate1, props.preferredPlate2, props.preferredPlate3].filter(Boolean).join(", ") || "-"}
         <br />
         Același județ: {props.sameCounty || "-"}
         <br />

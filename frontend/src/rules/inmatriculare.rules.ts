@@ -1,3 +1,5 @@
+import { documentsCatalog } from "./documents.catalog";
+
 export interface RuleResult {
   documents: string[];
   taxes: string[];
@@ -9,6 +11,7 @@ export interface InmatriculareInput {
   proxy: string;
   origin: string;
   vehicleCondition: string;
+  sellerType: string;
   plateType: string;
 }
 
@@ -19,65 +22,59 @@ export function buildInmatriculareDosar(
   const taxes: string[] = [];
   const forms: string[] = [];
 
-  // PF / PJ
-
   if (data.personType === "pf") {
-    documents.push("Carte identitate proprietar");
+    documents.push(documentsCatalog.ci_pf.name);
   }
 
   if (data.personType === "pj") {
-    documents.push("Certificat înregistrare firmă");
-    documents.push("Certificat constatator ONRC");
-    documents.push("Act identitate reprezentant legal");
+    documents.push(documentsCatalog.cui_pj.name);
+    documents.push(documentsCatalog.certificat_onrc.name);
+    documents.push(documentsCatalog.ci_reprezentant.name);
   }
-
-  // împuternicit
 
   if (data.proxy === "da") {
-    documents.push("Împuternicire");
-    documents.push("Act identitate împuternicit");
+    documents.push(documentsCatalog.imputernicire.name);
+    documents.push(documentsCatalog.ci_imputernicit.name);
   }
 
-  // documente comune
-
-  documents.push("Carte identitate vehicul");
-  documents.push("RCA");
+  documents.push(documentsCatalog.civ.name);
+  documents.push(documentsCatalog.rca.name);
 
   forms.push("Cerere înmatriculare");
 
-  taxes.push("Certificat de înmatriculare");
-
-  // origine
+  taxes.push("Taxă certificat de înmatriculare");
 
   if (data.origin === "romania") {
-    documents.push("Document proprietate");
+    documents.push(documentsCatalog.document_proprietate.name);
   }
 
   if (data.origin === "ue") {
-    documents.push("Acte străine vehicul");
-    documents.push("Certificat autenticitate RAR");
+    documents.push(documentsCatalog.acte_straine.name);
+    documents.push(documentsCatalog.certificat_rar.name);
   }
 
   if (data.origin === "non-ue") {
-    documents.push("Acte străine vehicul");
-    documents.push("Documente vamale");
-    documents.push("Certificat autenticitate RAR");
-    documents.push("Traduceri autorizate");
+    documents.push(documentsCatalog.acte_straine.name);
+    documents.push(documentsCatalog.documente_vamale.name);
+    documents.push(documentsCatalog.certificat_rar.name);
+    documents.push(documentsCatalog.traduceri.name);
   }
 
-  // nou / SH
-
   if (data.vehicleCondition === "nou") {
-    documents.push("Factură achiziție");
+    documents.push(documentsCatalog.factura.name);
   }
 
   if (data.vehicleCondition === "second-hand") {
-    documents.push("Contract vânzare-cumpărare");
+    if (data.sellerType === "pf") {
+      documents.push(documentsCatalog.contract_vc.name);
+    }
+
+    if (data.sellerType === "pj") {
+      documents.push(documentsCatalog.factura.name);
+    }
   }
 
-  // plăcuțe
-
-  taxes.push("Plăcuțe de înmatriculare");
+  taxes.push("Contravaloare plăcuțe de înmatriculare");
 
   if (data.plateType === "preferentiale") {
     taxes.push("Rezervare număr preferențial");

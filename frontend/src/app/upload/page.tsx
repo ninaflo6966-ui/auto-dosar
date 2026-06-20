@@ -13,217 +13,74 @@ const operationLabels: Record<string, string> = {
   "duplicat-talon": "Duplicat talon",
 };
 
-function getBaseDocuments(operationSlug: string): string[] {
-  switch (operationSlug) {
-    case "inmatriculare-definitiva":
-      return [
-        "Cerere înmatriculare",
-        "Carte identitate vehicul (CIV)",
-        "Document proprietate / factură",
-        "RCA valabil",
-        "Dovadă plată certificat înmatriculare",
-        "Dovadă plată plăcuțe",
-      ];
-
-    case "transcriere-auto":
-      return [
-        "Contract vânzare-cumpărare",
-        "Carte identitate vehicul (CIV)",
-        "Certificat de înmatriculare / talon",
-        "RCA pe noul proprietar",
-        "Certificat fiscal vânzător de la taxe și impozite locale",
-      ];
-
-    case "autorizatie-provizorie":
-      return [
-        "Cerere autorizare provizorie",
-        "Document proprietate",
-        "RCA provizorie",
-        "Dovadă plată plăcuțe provizorii",
-      ];
-
-    case "radiere-vehicul":
-      return [
-        "Cerere radiere",
-        "Certificat de înmatriculare",
-        "Plăcuțe de înmatriculare",
-        "Act justificativ radiere",
-      ];
-
-    case "modificare-date":
-      return [
-        "Cerere modificare date",
-        "Certificat de înmatriculare vechi",
-        "Document justificativ modificare",
-        "CIV actualizat, dacă este cazul",
-      ];
-
-    case "duplicat-talon":
-      return [
-        "Cerere duplicat talon",
-        "Declarație pierdere / furt / deteriorare",
-        "Act identitate solicitant",
-        "Dovadă plată duplicat",
-      ];
-
-    default:
-      return ["Documente dosar auto"];
-  }
-}
-
-function getPersonDocuments(personType: string): string[] {
-  if (personType === "pj") {
-    return [
-      "Certificat de înregistrare firmă / CUI",
-      "Certificat constatator ONRC",
-      "Act identitate reprezentant legal",
-    ];
-  }
-
-  return ["Carte identitate solicitant"];
-}
-
-function getOriginDocuments(origin: string): string[] {
-  if (origin === "ue") {
-    return [
-      "Acte străine vehicul",
-      "Certificat autenticitate RAR",
-      "Certificat ANAF privind TVA, dacă este cazul",
-      "Traduceri autorizate, dacă este cazul",
-    ];
-  }
-
-  if (origin === "non-ue") {
-    return [
-      "Acte străine vehicul",
-      "Documente vamale",
-      "Dovadă achitare taxe vamale",
-      "Certificat autenticitate RAR",
-      "Traduceri autorizate",
-    ];
-  }
-
-  return [];
-}
-
-function getProxyDocuments(proxy: string): string[] {
-  if (proxy === "da") {
-    return [
-      "Împuternicire / procură",
-      "Act identitate împuternicit",
-    ];
-  }
-
-  return [];
-}
-
-function removeDuplicates(items: string[]): string[] {
-  return Array.from(new Set(items));
-}
-
 export default function UploadPage() {
   const searchParams = useSearchParams();
- const operationSlug =
-  searchParams.get("operatiune") || "transcriere-auto";
 
-const personType =
-  searchParams.get("tip") || "pf";
+  const operationSlug = searchParams.get("operatiune") || "transcriere-auto";
+  const personType = searchParams.get("tip") || "pf";
+  const origin = searchParams.get("origine") || "romania";
+  const proxy = searchParams.get("imputernicit") || "nu";
+  const sameCounty = searchParams.get("acelasiJudet") || "";
+  const plateStaysOnCar = searchParams.get("numarRamanePeMasina") || "";
+  const plateType = searchParams.get("tipPlacute") || "";
+  const reason = searchParams.get("motivRadiere") || "";
+  const vehicleCondition = searchParams.get("stareVehicul") || "";
+  const sellerType = searchParams.get("tipVanzator") || "";
+  const temporaryAuthNumber = searchParams.get("numarAutorizatieProvizorie") || "";
+  const modificationType = searchParams.get("tipModificare") || "";
+  const duplicateReason = searchParams.get("motivDuplicat") || "";
+  const ownerKeepsPlateCombination = searchParams.get("proprietarPastreazaNumarul") || "";
+  const preferredPlate1 = searchParams.get("numarPreferential1") || "";
+  const preferredPlate2 = searchParams.get("numarPreferential2") || "";
+  const preferredPlate3 = searchParams.get("numarPreferential3") || "";
 
-const origin =
-  searchParams.get("origine") || "romania";
+  const operationTitle = operationLabels[operationSlug] || "Dosar auto";
+  const personLabel = personType === "pj" ? "Persoană juridică" : "Persoană fizică";
+  const originLabel =
+    origin === "ue" ? "Uniunea Europeană" : origin === "non-ue" ? "Non-UE" : "România";
+  const proxyLabel = proxy === "da" ? "Cu împuternicit" : "Fără împuternicit";
 
-const proxy =
-  searchParams.get("imputernicit") || "nu";
+  const dosar = buildDosar(operationSlug, {
+    personType,
+    proxy,
+    origin,
+    sameCounty,
+    plateStaysOnCar,
+    plateType,
+    reason,
+    vehicleCondition,
+    sellerType,
+    temporaryAuthNumber,
+    modificationType,
+    duplicateReason,
+    ownerKeepsPlateCombination,
+  });
 
-const sameCounty =
-  searchParams.get("acelasiJudet") || "";
+  const documents = dosar.documents;
+  const taxes = dosar.taxes;
+  const forms = dosar.forms;
 
-const plateStaysOnCar =
-  searchParams.get("numarRamanePeMasina") || "";
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, File | null>>({});
 
-const plateType =
-  searchParams.get("tipPlacute") || "";
+  function handleFileChange(documentName: string, file: File | null) {
+    setUploadedFiles((prev) => ({
+      ...prev,
+      [documentName]: file,
+    }));
+  }
 
-const reason =
-  searchParams.get("motivRadiere") || "";
+  const uploadedCount = Object.values(uploadedFiles).filter(Boolean).length;
+  const preferredPlates = [preferredPlate1, preferredPlate2, preferredPlate3].filter(Boolean);
 
-const vehicleCondition =
-  searchParams.get("stareVehicul") || "";
-
-const temporaryAuthNumber =
-  searchParams.get("numarAutorizatieProvizorie") || "";
-
-const modificationType =
-  searchParams.get("tipModificare") || "";
-
-const duplicateReason =
-  searchParams.get("motivDuplicat") || "";
-
-const operationTitle =
-  operationLabels[operationSlug] || "Dosar auto";
-
-const personLabel =
-  personType === "pj" ? "Persoană juridică" : "Persoană fizică";
-
-const originLabel =
-  origin === "ue"
-    ? "Uniunea Europeană"
-    : origin === "non-ue"
-    ? "Non-UE"
-    : "România";
-
-const proxyLabel =
-  proxy === "da" ? "Cu împuternicit" : "Fără împuternicit";
-
-const dosar = buildDosar(operationSlug, {
-  personType,
-  proxy,
-  origin,
-  sameCounty,
-  plateStaysOnCar,
-  plateType,
-  reason,
-  vehicleCondition,
-  temporaryAuthNumber,
-  modificationType,
-  duplicateReason,
-});
-
-const documents = dosar.documents;
-const taxes = dosar.taxes;
-const forms = dosar.forms;
-
-const [uploadedFiles, setUploadedFiles] = useState<
-  Record<string, File | null>
->({});
-
-function handleFileChange(
-  documentName: string,
-  file: File | null
-) {
-  setUploadedFiles((prev) => ({
-    ...prev,
-    [documentName]: file,
-  }));
-}
-
-const uploadedCount =
-  Object.values(uploadedFiles).filter(Boolean).length;
-      
-    return (
-  <main
-    style={{
-      minHeight: "100vh",
-      background: "#f4f7fb",
-      padding: "50px 24px",
-    }}
-  >
-      <div
-        style={{
-          maxWidth: "1000px",
-          margin: "0 auto",
-        }}
-      >
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#f4f7fb",
+        padding: "50px 24px",
+      }}
+    >
+      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
         <a
           href={`/expert-dosar?operatiune=${operationSlug}`}
           style={{
@@ -245,71 +102,30 @@ const uploadedCount =
             boxShadow: "0 10px 25px rgba(15, 23, 42, 0.06)",
           }}
         >
-          <h1
-            style={{
-              fontSize: "36px",
-              marginBottom: "10px",
-            }}
-          >
-            Upload documente
-            <div
-  style={{
-    marginTop: "30px",
-    padding: "20px",
-    background: "#f9fafb",
-    borderRadius: "12px",
-    border: "1px solid #e5e7eb",
-  }}
->
-  <h3>Taxe estimate</h3>
+          <h1 style={{ fontSize: "36px", marginBottom: "10px" }}>Upload documente</h1>
 
-  {taxes.map((tax: string) => (
-    <div key={tax}>
-      • {tax}
-    </div>
-  ))}
-</div>
-          </h1>
-
-          <p
-            style={{
-              marginBottom: "8px",
-              color: "#4b5563",
-              fontSize: "17px",
-            }}
-          >
+          <p style={{ marginBottom: "8px", color: "#4b5563", fontSize: "17px" }}>
             Operațiune: <strong>{operationTitle}</strong>
           </p>
-
-          <p
-            style={{
-              marginBottom: "8px",
-              color: "#4b5563",
-              fontSize: "17px",
-            }}
-          >
+          <p style={{ marginBottom: "8px", color: "#4b5563", fontSize: "17px" }}>
             Tip solicitant: <strong>{personLabel}</strong>
           </p>
-
-          <p
-            style={{
-              marginBottom: "8px",
-              color: "#4b5563",
-              fontSize: "17px",
-            }}
-          >
+          <p style={{ marginBottom: "8px", color: "#4b5563", fontSize: "17px" }}>
             Origine vehicul: <strong>{originLabel}</strong>
           </p>
-
-          <p
-            style={{
-              marginBottom: "28px",
-              color: "#4b5563",
-              fontSize: "17px",
-            }}
-          >
+          <p style={{ marginBottom: "8px", color: "#4b5563", fontSize: "17px" }}>
             Reprezentare: <strong>{proxyLabel}</strong>
           </p>
+          {sellerType && (
+            <p style={{ marginBottom: "8px", color: "#4b5563", fontSize: "17px" }}>
+              Vânzător: <strong>{sellerType === "pf" ? "Persoană fizică" : "Persoană juridică"}</strong>
+            </p>
+          )}
+          {preferredPlates.length > 0 && (
+            <p style={{ marginBottom: "28px", color: "#4b5563", fontSize: "17px" }}>
+              Combinații preferențiale: <strong>{preferredPlates.join(", ")}</strong>
+            </p>
+          )}
 
           <div
             style={{
@@ -320,84 +136,66 @@ const uploadedCount =
               border: "1px solid #e5e7eb",
             }}
           >
-            <strong>Progres:</strong>{" "}
-            {uploadedCount} / {documents.length} documente selectate
+            <strong>Progres:</strong> {uploadedCount} / {documents.length} documente selectate
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gap: "16px",
-            }}
-          >
-            {documents.map((documentName: string) => {
-              const file = uploadedFiles[documentName];
+          <Section title="Taxe estimate">
+            {taxes.length > 0 ? taxes.map((tax: string) => <SimpleLine key={tax} text={tax} />) : <EmptyLine text="Nu există taxe estimate." />}
+          </Section>
 
-              return (
-                <div
-                  key={documentName}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "20px",
-                    padding: "18px",
-                    borderRadius: "12px",
-                    background: "#f9fafb",
-                    border: "1px solid #e5e7eb",
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        fontWeight: "bold",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      {documentName}
-                    </div>
+          <Section title="Formulare generate">
+            {forms.length > 0 ? forms.map((form: string) => <SimpleLine key={form} text={form} />) : <EmptyLine text="Nu există formulare generate." />}
+          </Section>
 
-                    <div
-                      style={{
-                        color: file
-                          ? "#047857"
-                          : "#9ca3af",
-                      }}
-                    >
-                      {file
-                        ? file.name
-                        : "Niciun fișier selectat"}
-                    </div>
-                  </div>
+          <Section title="Documente necesare">
+            <div style={{ display: "grid", gap: "16px" }}>
+              {documents.map((documentName: string) => {
+                const file = uploadedFiles[documentName];
 
-                  <label
+                return (
+                  <div
+                    key={documentName}
                     style={{
-                      background: "#111827",
-                      color: "white",
-                      padding: "12px 18px",
-                      borderRadius: "10px",
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "20px",
+                      padding: "18px",
+                      borderRadius: "12px",
+                      background: "#f9fafb",
+                      border: "1px solid #e5e7eb",
                     }}
                   >
-                    Alege fișier
+                    <div>
+                      <div style={{ fontWeight: "bold", marginBottom: "6px" }}>{documentName}</div>
+                      <div style={{ color: file ? "#047857" : "#9ca3af" }}>
+                        {file ? file.name : "Niciun fișier selectat"}
+                      </div>
+                    </div>
 
-                    <input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      style={{ display: "none" }}
-                      onChange={(e) =>
-                        handleFileChange(
-                          documentName,
-                          e.target.files?.[0] || null
-                        )
-                      }
-                    />
-                  </label>
-                </div>
-              );
-            })}
-          </div>
+                    <label
+                      style={{
+                        background: "#111827",
+                        color: "white",
+                        padding: "12px 18px",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Alege fișier
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        style={{ display: "none" }}
+                        onChange={(e) => handleFileChange(documentName, e.target.files?.[0] || null)}
+                      />
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          </Section>
 
           <div
             style={{
@@ -426,15 +224,9 @@ const uploadedCount =
                 padding: "14px 22px",
                 borderRadius: "10px",
                 border: "none",
-                background:
-                  uploadedCount > 0
-                    ? "#111827"
-                    : "#9ca3af",
+                background: uploadedCount > 0 ? "#111827" : "#9ca3af",
                 color: "white",
-                cursor:
-                  uploadedCount > 0
-                    ? "pointer"
-                    : "not-allowed",
+                cursor: uploadedCount > 0 ? "pointer" : "not-allowed",
               }}
               disabled={uploadedCount === 0}
               onClick={() => {
@@ -447,29 +239,19 @@ const uploadedCount =
                   originLabel,
                   proxy,
                   proxyLabel,
-                  documents: documents.map(
-                    (documentName: string) => ({
-                      name: documentName,
-                      fileName:
-                        uploadedFiles[
-                          documentName
-                        ]?.name || null,
-                      uploaded: Boolean(
-                        uploadedFiles[
-                          documentName
-                        ]
-                      ),
-                    })
-                  ),
+                  sellerType,
+                  preferredPlates,
+                  taxes,
+                  forms,
+                  documents: documents.map((documentName: string) => ({
+                    name: documentName,
+                    fileName: uploadedFiles[documentName]?.name || null,
+                    uploaded: Boolean(uploadedFiles[documentName]),
+                  })),
                 };
 
-                localStorage.setItem(
-                  "autoDosarPreview",
-                  JSON.stringify(previewData)
-                );
-
-                window.location.href =
-                  "/preview";
+                localStorage.setItem("autoDosarPreview", JSON.stringify(previewData));
+                window.location.href = "/preview";
               }}
             >
               Continuă
@@ -478,5 +260,45 @@ const uploadedCount =
         </div>
       </div>
     </main>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginTop: "26px" }}>
+      <h2 style={{ fontSize: "22px", marginBottom: "12px" }}>{title}</h2>
+      <div style={{ display: "grid", gap: "10px" }}>{children}</div>
+    </div>
+  );
+}
+
+function SimpleLine({ text }: { text: string }) {
+  return (
+    <div
+      style={{
+        padding: "12px 14px",
+        borderRadius: "10px",
+        background: "#f9fafb",
+        border: "1px solid #e5e7eb",
+      }}
+    >
+      • {text}
+    </div>
+  );
+}
+
+function EmptyLine({ text }: { text: string }) {
+  return (
+    <div
+      style={{
+        padding: "12px 14px",
+        borderRadius: "10px",
+        background: "#f9fafb",
+        border: "1px solid #e5e7eb",
+        color: "#6b7280",
+      }}
+    >
+      {text}
+    </div>
   );
 }

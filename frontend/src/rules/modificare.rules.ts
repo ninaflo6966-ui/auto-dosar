@@ -1,3 +1,5 @@
+import { documentsCatalog } from "./documents.catalog";
+
 export interface RuleResult {
   documents: string[];
   taxes: string[];
@@ -10,52 +12,79 @@ export interface ModificareInput {
   modificationType: string;
 }
 
-export function buildModificareDosar(data: ModificareInput): RuleResult {
+export function buildModificareDosar(
+  data: ModificareInput
+): RuleResult {
   const documents: string[] = [];
   const taxes: string[] = [];
   const forms: string[] = [];
 
+  // PF / PJ
+
   if (data.personType === "pf") {
-    documents.push("Carte identitate solicitant");
+    documents.push(documentsCatalog.ci_pf.name);
   }
 
   if (data.personType === "pj") {
-    documents.push("Certificat înregistrare firmă");
-    documents.push("Act identitate reprezentant legal");
+    documents.push(documentsCatalog.cui_pj.name);
+    documents.push(documentsCatalog.ci_reprezentant.name);
   }
+
+  // Împuternicit
 
   if (data.proxy === "da") {
-    documents.push("Împuternicire");
-    documents.push("Act identitate împuternicit");
+    documents.push(documentsCatalog.imputernicire.name);
+    documents.push(documentsCatalog.ci_imputernicit.name);
   }
 
-  documents.push("Certificat de înmatriculare vechi");
-  documents.push("Carte identitate vehicul, dacă este cazul");
+  // Documente de bază
+
+  documents.push(documentsCatalog.talon.name);
 
   switch (data.modificationType) {
     case "domiciliu":
-      documents.push("Document justificativ schimbare domiciliu");
+      documents.push(
+        "Document justificativ schimbare domiciliu"
+      );
       break;
 
     case "sediu":
-      documents.push("Document justificativ schimbare sediu");
+      documents.push(
+        "Document justificativ schimbare sediu"
+      );
       break;
 
     case "nume":
-      documents.push("Document justificativ schimbare nume");
+      documents.push(
+        "Document justificativ schimbare nume"
+      );
       break;
 
     case "denumire-firma":
-      documents.push("Document justificativ schimbare denumire firmă");
+      documents.push(
+        "Document justificativ schimbare denumire firmă"
+      );
       break;
 
     case "tehnice":
-      documents.push("Document RAR / CIV actualizată");
+      documents.push(
+        "Document RAR / CIV actualizată"
+      );
+      documents.push(documentsCatalog.civ.name);
       break;
   }
 
-  forms.push("Cerere modificare date certificat înmatriculare");
-  taxes.push("Taxă certificat de înmatriculare");
+  forms.push(
+    "Cerere modificare date certificat de înmatriculare"
+  );
 
-  return { documents, taxes, forms };
+  taxes.push(
+    "Taxă certificat de înmatriculare"
+  );
+
+  return {
+    documents,
+    taxes,
+    forms,
+  };
 }

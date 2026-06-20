@@ -1,3 +1,5 @@
+import { documentsCatalog } from "./documents.catalog";
+
 export interface RuleResult {
   documents: string[];
   taxes: string[];
@@ -8,6 +10,7 @@ export interface RadiereInput {
   personType: string;
   proxy: string;
   reason: string;
+  ownerKeepsPlateCombination: string;
 }
 
 export function buildRadiereDosar(
@@ -18,23 +21,27 @@ export function buildRadiereDosar(
   const forms: string[] = [];
 
   if (data.personType === "pf") {
-    documents.push("Carte identitate");
+    documents.push(documentsCatalog.ci_pf.name);
   }
 
   if (data.personType === "pj") {
-    documents.push("Certificat înregistrare firmă");
-    documents.push("Act identitate reprezentant legal");
+    documents.push(documentsCatalog.cui_pj.name);
+    documents.push(documentsCatalog.ci_reprezentant.name);
   }
 
   if (data.proxy === "da") {
-    documents.push("Împuternicire");
-    documents.push("Act identitate împuternicit");
+    documents.push(documentsCatalog.imputernicire.name);
+    documents.push(documentsCatalog.ci_imputernicit.name);
   }
 
-  documents.push("Certificat de înmatriculare");
-  documents.push("Cartea de identitate a vehiculului");
+  documents.push(documentsCatalog.talon.name);
+  documents.push(documentsCatalog.civ.name);
 
   forms.push("Cerere radiere");
+
+  if (data.ownerKeepsPlateCombination === "da") {
+    forms.push("Cerere păstrare număr");
+  }
 
   switch (data.reason) {
     case "export":
@@ -42,11 +49,11 @@ export function buildRadiereDosar(
       break;
 
     case "casare":
-      documents.push("Certificat distrugere");
+      documents.push("Certificat de distrugere / casare");
       break;
 
     case "furt":
-      documents.push("Dovadă declarare furt");
+      documents.push(documentsCatalog.dovada_furt.name);
       break;
 
     case "la-cerere":
