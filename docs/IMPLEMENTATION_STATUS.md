@@ -25,3 +25,12 @@ Implemented asynchronous in-memory event bus, typed domain events, deterministic
 ## ISSUE-004 — Rule Engine — IN PROGRESS
 
 Milestone 4.1 (Core) is implemented: contracts, repository, evaluator factory, executor, report aggregation, confidence score, tests and documentation. Decision Engine remains ISSUE-005.
+
+## ISSUE-004 Rule Engine
+- [x] 4.1 Rule Engine Core
+- [x] 4.2 Explainable Rule System
+- [ ] 4.3 Rule DSL
+- [ ] 4.4 Knowledge Integration
+- [ ] 4.5 Decision Integration
+- [ ] 4.6 Workflow Integration
+

@@ -2,6 +2,10 @@ import type { LegalReference } from "../../knowledge";
 import type { RuleCategory } from "./RuleCategory";
 import type { RuleSeverity } from "./RuleSeverity";
 import type { RuleOutcome } from "./RuleStatus";
+import type { Explanation } from "../models/Explanation";
+import type { Recommendation } from "../models/Recommendation";
+import type { NextAction } from "../models/NextAction";
+import type { RuleTrace } from "../models/RuleTrace";
 
 export interface RuleConditionTrace {
   path: string;
@@ -23,6 +27,10 @@ export interface RuleResult {
   reason: string;
   recommendation?: string;
   legalReferences: readonly LegalReference[];
+  explanation: Explanation;
+  recommendations: readonly Recommendation[];
+  nextActions: readonly NextAction[];
+  trace: RuleTrace;
   traces: readonly RuleConditionTrace[];
   evaluatedAt: string;
   durationMs: number;
