@@ -16,3 +16,5 @@ export * from "./document-generation";
 // Canonical Core Domain Model v1.0. Exportat ca namespace pentru a evita
 // coliziunile temporare cu modelele legacy, până la migrarea acestora.
 export * as Domain from "./domain";
+
+export * from "./rules";

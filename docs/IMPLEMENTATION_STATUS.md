@@ -3,9 +3,9 @@
 | Issue | Componentă | Stare |
 |---|---|---|
 | ISSUE-001 | Core Domain Model v1.0 | Implementat — fundație inițială |
-| ISSUE-002 | Digital Twin Engine | Următorul |
-| ISSUE-003 | Knowledge Engine 2.0 | Planificat |
-| ISSUE-004 | Rule & Decision Engine | Planificat |
+| ISSUE-002 | Digital Twin Engine | Implementat v1.0 |
+| ISSUE-003 | Knowledge Engine 2.0 | Implementat — baseline |
+| ISSUE-004 | Rule Engine | În lucru — Milestone 4.1 implementat |
 
 ## ISSUE-002 — Digital Twin Engine
 
@@ -20,3 +20,8 @@ Status: CLOSED (implementation baseline). Legal seed data requires verification 
 ## ISSUE-003.5 — Event Bus & Domain Events — CLOSED
 
 Implemented asynchronous in-memory event bus, typed domain events, deterministic subscriptions, middleware, metrics, retry, dead-letter queue, correlation/causation tracing, Twin-to-Rule bridge and tests. See `docs/issues/ISSUE-003.5-EVENT-BUS-DOMAIN-EVENTS.md`.
+
+
+## ISSUE-004 — Rule Engine — IN PROGRESS
+
+Milestone 4.1 (Core) is implemented: contracts, repository, evaluator factory, executor, report aggregation, confidence score, tests and documentation. Decision Engine remains ISSUE-005.

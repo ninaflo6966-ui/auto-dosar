@@ -15,6 +15,7 @@
     "test:document-generation": "npm --workspace frontend exec tsx ../packages/adi-core/src/document-generation/tests/documentGenerationEngine.demo.ts",
     "test:twin": "npm --workspace frontend exec tsx ../packages/adi-core/src/twin/tests/digitalTwinEngine.test.ts",
     "test:knowledge": "npm --workspace frontend exec tsx ../packages/adi-core/src/knowledge/tests/knowledgeEngine.test.ts",
-    "test:events": "npm --workspace frontend exec tsx ../packages/adi-core/src/events/tests/eventBus.test.ts"
+    "test:events": "npm --workspace frontend exec tsx ../packages/adi-core/src/events/tests/eventBus.test.ts",
+    "test:rules": "npm --workspace frontend exec tsx ../packages/adi-core/src/rules/tests/ruleEngine.test.ts"
   }
 }
