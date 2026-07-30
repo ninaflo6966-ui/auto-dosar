@@ -34,3 +34,16 @@ Milestone 4.1 (Core) is implemented: contracts, repository, evaluator factory, e
 - [ ] 4.5 Decision Integration
 - [ ] 4.6 Workflow Integration
 
+
+## ISSUE-004.3 — Rule DSL
+
+Status: **Implemented**
+
+- Serializable expression tree (`CONDITION`, `PREDICATE`, `AND`, `OR`, `NOT`)
+- Domain predicate library for operation, applicant, proxy, vehicle, and documents
+- Fluent typed `RuleBuilder`
+- Rule metadata, legal references, recommendations, and next actions
+- `RuleRegistry` and version-aware duplicate protection
+- `RulePack` manifest and grouped registration
+- Backward-compatible execution through the existing `RuleEngine`
+- Dedicated DSL tests integrated into `npm run test:rules`

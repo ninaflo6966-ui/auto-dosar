@@ -6,6 +6,7 @@ import type { RuleStatus } from "./RuleStatus";
 import type { ExplanationTemplate } from "../models/Explanation";
 import type { RecommendationDefinition } from "../models/Recommendation";
 import type { NextActionDefinition } from "../models/NextAction";
+import type { RuleExpression } from "../dsl/Expression";
 
 export interface Rule {
   id: string;
@@ -17,6 +18,7 @@ export interface Rule {
   status: RuleStatus;
   priority: number;
   conditions: readonly RuleCondition[];
+  expression?: RuleExpression;
   message: string;
   reason: string;
   recommendation?: string;
@@ -27,4 +29,10 @@ export interface Rule {
   tags?: readonly string[];
   validFrom?: string;
   validUntil?: string;
+  metadata?: Readonly<{
+    owner?: string;
+    author?: string;
+    operation?: string;
+    [key: string]: unknown;
+  }>;
 }

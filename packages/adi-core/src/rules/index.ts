@@ -23,3 +23,5 @@ export * from "./builders/ExplanationBuilder";
 export * from "./builders/RecommendationBuilder";
 export * from "./builders/NextActionBuilder";
 export * from "./builders/TraceBuilder";
+
+export * from "./dsl";
