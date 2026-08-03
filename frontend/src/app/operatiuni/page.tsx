@@ -1,31 +1,12 @@
-const operations = [
-  {
-    slug: "inmatriculare-definitiva",
-    title: "Înmatriculare definitivă",
-  },
-  {
-    slug: "transcriere-auto",
-    title: "Transcriere auto",
-  },
-  {
-    slug: "autorizatie-provizorie",
-    title: "Autorizație provizorie",
-  },
-  {
-    slug: "radiere-vehicul",
-    title: "Radiere vehicul",
-  },
-  {
-    slug: "modificare-date",
-    title: "Modificare date",
-  },
-  {
-    slug: "duplicat-talon",
-    title: "Duplicat talon",
-  },
-];
+import { createDefaultOperationRegistry } from "@autodosar/adi-core/operations";
+
+const iconByName: Record<string, string> = {
+  "arrow-left-right": "↔",
+};
 
 export default function OperatiuniPage() {
+  const operations = createDefaultOperationRegistry().list();
+
   return (
     <main
       style={{
@@ -34,40 +15,17 @@ export default function OperatiuniPage() {
         padding: "50px 24px",
       }}
     >
-      <div
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
-        }}
-      >
-        <a
-          href="/"
-          style={{
-            textDecoration: "none",
-            color: "#374151",
-          }}
-        >
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <a href="/" style={{ textDecoration: "none", color: "#374151" }}>
           ← Înapoi acasă
         </a>
 
-        <h1
-          style={{
-            fontSize: "42px",
-            marginTop: "24px",
-            marginBottom: "12px",
-          }}
-        >
+        <h1 style={{ fontSize: "42px", marginTop: "24px", marginBottom: "12px" }}>
           Alege operațiunea
         </h1>
 
-        <p
-          style={{
-            color: "#6b7280",
-            marginBottom: "36px",
-            fontSize: "18px",
-          }}
-        >
-          Selectează tipul de dosar pe care dorești să îl generezi.
+        <p style={{ color: "#6b7280", marginBottom: "36px", fontSize: "18px" }}>
+          Selectează un flux disponibil în versiunea curentă AutoDosar.
         </p>
 
         <div
@@ -78,8 +36,8 @@ export default function OperatiuniPage() {
           }}
         >
           {operations.map((operation) => (
-            <div
-              key={operation.slug}
+            <article
+              key={operation.id}
               style={{
                 background: "white",
                 borderRadius: "18px",
@@ -88,24 +46,18 @@ export default function OperatiuniPage() {
                 boxShadow: "0 10px 25px rgba(15,23,42,0.05)",
               }}
             >
-              <h2
-                style={{
-                  fontSize: "22px",
-                  marginBottom: "12px",
-                }}
-              >
-                {operation.title}
+              <div style={{ fontSize: "28px", marginBottom: "12px" }} aria-hidden="true">
+                {iconByName[operation.icon] ?? "🚗"}
+              </div>
+              <h2 style={{ fontSize: "22px", marginBottom: "12px" }}>
+                {operation.shortTitle}
               </h2>
-
-              <p
-                style={{
-                  color: "#6b7280",
-                  marginBottom: "20px",
-                }}
-              >
-                Creează dosarul pentru această operațiune.
+              <p style={{ color: "#6b7280", marginBottom: "8px", lineHeight: 1.55 }}>
+                {operation.description}
               </p>
-
+              <p style={{ color: "#64748b", marginBottom: "20px", fontSize: "14px" }}>
+                Timp estimat: {operation.estimatedMinutes ?? 5} minute
+              </p>
               <a
                 href={`/expert-dosar?operatiune=${operation.slug}`}
                 style={{
@@ -117,9 +69,9 @@ export default function OperatiuniPage() {
                   textDecoration: "none",
                 }}
               >
-                Continuă
+                Pornește Expert Dosar
               </a>
-            </div>
+            </article>
           ))}
         </div>
       </div>

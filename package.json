@@ -17,6 +17,8 @@
     "test:knowledge": "npm --workspace frontend exec tsx ../packages/adi-core/src/knowledge/tests/knowledgeEngine.test.ts",
     "test:events": "npm --workspace frontend exec tsx ../packages/adi-core/src/events/tests/eventBus.test.ts",
     "test:rules": "npm --workspace frontend exec tsx ../packages/adi-core/src/rules/tests/ruleEngine.test.ts && npm run test:rule-dsl",
-    "test:rule-dsl": "npm --workspace frontend exec tsx ../packages/adi-core/src/rules/tests/ruleDsl.test.ts"
+    "test:rule-dsl": "npm --workspace frontend exec tsx ../packages/adi-core/src/rules/tests/ruleDsl.test.ts",
+    "test:operations": "npm --workspace frontend exec tsx ../packages/adi-core/src/operations/tests/operationRegistry.test.ts",
+    "test:checklist": "npm --workspace frontend exec tsx ../packages/adi-core/src/checklist/tests/smartChecklistEngine.test.ts"
   }
 }

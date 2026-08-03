@@ -18,3 +18,5 @@ export * from "./document-generation";
 export * as Domain from "./domain";
 
 export * from "./rules";
+
+export * from "./operations";
