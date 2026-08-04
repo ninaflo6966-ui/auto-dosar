@@ -47,3 +47,9 @@ Status: **Implemented**
 - `RulePack` manifest and grouped registration
 - Backward-compatible execution through the existing `RuleEngine`
 - Dedicated DSL tests integrated into `npm run test:rules`
+
+## Product MVP use cases
+
+- [x] M-001.5 CreateCaseFileUseCase
+- [x] M-001.6 UpdateAnswerUseCase + checklist rebuild
+- [ ] M-001.7 UploadDocumentUseCase

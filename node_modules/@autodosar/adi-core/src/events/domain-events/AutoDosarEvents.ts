@@ -2,6 +2,8 @@ import { createDomainEvent, type DomainEvent, type DomainEventInput } from "../c
 import { EventTypes } from "./EventTypes";
 
 export interface CaseCreatedPayload { caseId: string; reference: string; operation: string; operationSlug?: string; status: string; }
+export interface CaseAnswersUpdatedPayload { caseId: string; changedAnswerIds: readonly string[]; version: number; }
+export interface ChecklistUpdatedPayload { caseId: string; score: number; requiredCount: number; missingRequiredCount: number; readyForSubmission: boolean; version: number; }
 export interface DocumentUploadedPayload { documentId: string; fileName: string; mimeType: string; sizeBytes: number; documentType?: string; }
 export interface OcrCompletedPayload { documentId: string; confidence: number; extractedFields: Readonly<Record<string, unknown>>; }
 export interface TwinUpdatedPayload { twinId: string; previousVersion: number; currentVersion: number; changedPaths: readonly string[]; }
@@ -23,6 +25,8 @@ function factory<T>(eventType: string, aggregateType: string, input: EventFactor
 
 export const AutoDosarEvents = {
   caseCreated: (input: EventFactoryInput<CaseCreatedPayload>) => factory(EventTypes.CASE_CREATED, "Case", input),
+  caseAnswersUpdated: (input: EventFactoryInput<CaseAnswersUpdatedPayload>) => factory(EventTypes.CASE_ANSWERS_UPDATED, "Case", input),
+  checklistUpdated: (input: EventFactoryInput<ChecklistUpdatedPayload>) => factory(EventTypes.CHECKLIST_UPDATED, "Case", input),
   documentUploaded: (input: EventFactoryInput<DocumentUploadedPayload>) => factory(EventTypes.DOCUMENT_UPLOADED, "Case", input),
   ocrCompleted: (input: EventFactoryInput<OcrCompletedPayload>) => factory(EventTypes.OCR_COMPLETED, "Case", input),
   twinUpdated: (input: EventFactoryInput<TwinUpdatedPayload>) => factory(EventTypes.TWIN_UPDATED, "DigitalTwin", input),

@@ -1,5 +1,7 @@
 export const EventTypes = {
   CASE_CREATED: "case.created",
+  CASE_ANSWERS_UPDATED: "case.answers.updated",
+  CHECKLIST_UPDATED: "case.checklist.updated",
   DOCUMENT_UPLOADED: "document.uploaded",
   DOCUMENT_CLASSIFIED: "document.classified",
   OCR_COMPLETED: "ocr.completed",
