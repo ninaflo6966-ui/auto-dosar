@@ -127,3 +127,24 @@ body {
   .checklist-actions { flex-direction: column-reverse; }
   .checklist-link { width: 100%; }
 }
+
+/* M-001.8 — Smart Upload UI */
+.checklist-error { margin: 24px 34px 0; padding: 14px 16px; border: 1px solid #fecaca; border-radius: 12px; background: #fef2f2; color: #991b1b; }
+.upload-file-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 0 !important; color: #475569 !important; font-size: .84rem; }
+.upload-file-meta strong { color: #0f172a; }
+.upload-file-meta span { color: #64748b; }
+.upload-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
+.upload-input-hidden { display: none; }
+.upload-button { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 8px 13px; border: 1px solid transparent; border-radius: 10px; font: inherit; font-size: .84rem; font-weight: 760; text-decoration: none; cursor: pointer; }
+.upload-button.primary { background: #111827; color: #fff; }
+.upload-button.primary:hover:not(:disabled) { background: #2563eb; }
+.upload-button.secondary { border-color: #cbd5e1; background: #fff; color: #334155; }
+.upload-button.danger { border-color: #fecaca; background: #fff; color: #b91c1c; }
+.upload-button:disabled { opacity: .48; cursor: not-allowed; }
+.checklist-item.status-uploaded { border-color: #bfdbfe; background: #f8fbff; }
+
+@media (max-width: 640px) {
+  .checklist-error { margin-left: 20px; margin-right: 20px; }
+  .upload-actions { flex-direction: column; }
+  .upload-button { width: 100%; }
+}

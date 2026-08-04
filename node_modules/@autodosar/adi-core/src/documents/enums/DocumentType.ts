@@ -3,6 +3,8 @@ export enum DocumentType {
   ElectronicIdentityCardFront = "ELECTRONIC_IDENTITY_CARD_FRONT",
   ElectronicIdentityCardBack = "ELECTRONIC_IDENTITY_CARD_BACK",
   DomicileCertificate = "DOMICILE_CERTIFICATE",
+  CompanyRegistrationCertificate = "COMPANY_REGISTRATION_CERTIFICATE",
+  TradeRegistryCertificate = "TRADE_REGISTRY_CERTIFICATE",
 
   CIV = "CIV",
   RegistrationCertificate = "REGISTRATION_CERTIFICATE",

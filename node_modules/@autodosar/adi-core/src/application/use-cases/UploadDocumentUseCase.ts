@@ -129,7 +129,14 @@ export class UploadDocumentUseCase {
       updatedAt: now,
     };
 
-    const withDocument = this.manager.addDocument(current, document, "USER", now);
+    const previousDocuments = current.documents.filter(
+      (item) => item.operationDocumentId === request.checklistDocumentId,
+    );
+    const baseCase = previousDocuments.reduce(
+      (state, item) => this.manager.removeDocument(state, item.id, "USER", now),
+      current,
+    );
+    const withDocument = this.manager.addDocument(baseCase, document, "USER", now);
     const checklist = this.checklistEngine.build({
       operation,
       answers: withDocument.answers,

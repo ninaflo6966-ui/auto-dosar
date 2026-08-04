@@ -13,6 +13,7 @@ interface StoredExpertState {
 
 export default function ChecklistPage() {
   const [checklist, setChecklist] = useState<SmartChecklistResult | null>(null);
+  const [expertState, setExpertState] = useState<StoredExpertState | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,6 +30,8 @@ export default function ChecklistPage() {
       setError("Datele salvate nu mai pot fi citite. Reia Expert Dosar.");
       return;
     }
+
+    setExpertState(stored);
 
     const controller = new AbortController();
     generateChecklist(stored.operationSlug, { answers: stored.answers }, controller.signal)
@@ -57,5 +60,7 @@ export default function ChecklistPage() {
     return <main className="expert-page"><div className="expert-state">Se generează checklist-ul personalizat…</div></main>;
   }
 
-  return <main className="expert-page"><SmartChecklistView checklist={checklist} /></main>;
+  if (!expertState) return null;
+
+  return <main className="expert-page"><SmartChecklistView checklist={checklist} operationSlug={expertState.operationSlug} answers={expertState.answers} /></main>;
 }
