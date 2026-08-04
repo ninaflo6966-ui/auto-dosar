@@ -135,13 +135,15 @@ export class UpdateAnswerUseCase {
   }
 
   private getUploadedDocumentIds(documents: CaseDocument[]): string[] {
-    return documents.map((document) => this.toOperationDocumentId(document.type)).filter((id): id is string => Boolean(id));
+    return documents
+      .map((document) => document.operationDocumentId ?? this.toOperationDocumentId(document.type))
+      .filter((id): id is string => Boolean(id));
   }
 
   private getValidatedDocumentIds(documents: CaseDocument[]): string[] {
     return documents
       .filter((document) => String(document.status).toUpperCase() === "VALIDATED")
-      .map((document) => this.toOperationDocumentId(document.type))
+      .map((document) => document.operationDocumentId ?? this.toOperationDocumentId(document.type))
       .filter((id): id is string => Boolean(id));
   }
 
