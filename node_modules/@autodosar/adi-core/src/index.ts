@@ -20,3 +20,5 @@ export * as Domain from "./domain";
 export * from "./rules";
 
 export * from "./operations";
+
+export * from "./application";
